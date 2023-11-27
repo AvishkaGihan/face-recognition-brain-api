@@ -1,3 +1,10 @@
+// Import required modules
+const express = require("express");
+const bodyParser = require("body-parser");
+
+// Create an instance of the Express application
+const app = express();
+
 // Use body-parser middleware to parse JSON requests
 app.use(bodyParser.json());
 
