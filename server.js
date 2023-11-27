@@ -1,16 +1,10 @@
-// Import required modules
-const express = require("express");
-const bodyParser = require("body-parser");
-
-// Create an instance of the Express application
-const app = express();
-
 // Use body-parser middleware to parse JSON requests
 app.use(bodyParser.json());
 
 // In-memory database for demonstration purposes
 const database = {
   users: [
+    // Sample user data
     {
       id: 1,
       name: "John Doe",
@@ -40,8 +34,7 @@ const database = {
 
 // Define a route for the root path
 app.get("/", (req, res) => {
-  // Respond with "Hello World!" for the root path
-  res.send("Hello World!");
+  res.json(database.users);
 });
 
 // Define a route for user sign-in
@@ -66,7 +59,7 @@ app.post("/register", (req, res) => {
 
   // Add a new user to the database
   database.users.push({
-    id: "125",
+    id: 125,
     name: name,
     email: email,
     password: password,
@@ -78,15 +71,46 @@ app.post("/register", (req, res) => {
   res.json(database.users[database.users.length - 1]);
 });
 
+// Define a route for fetching user profile by ID
+app.get("/profile/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  let found = false;
+
+  // Iterate through the database users to find the user with the specified ID
+  database.users.forEach((user) => {
+    if (user.id === id) {
+      found = true;
+      return res.json(user); // Respond with the user details if found
+    }
+  });
+
+  // If no user is found with the specified ID, respond with a 404 error
+  if (!found) {
+    return res.status(404).json("No such user");
+  }
+});
+
+// Define a route for updating user image entry count
+app.put("/image", (req, res) => {
+  const id = parseInt(req.body.id);
+  let found = false;
+
+  // Iterate through the database users to find the user with the specified ID
+  database.users.forEach((user) => {
+    if (user.id === id) {
+      found = true;
+      user.entries++;
+      return res.json(user.entries);
+    }
+  });
+
+  // If no user is found with the specified ID, respond with a 404 error
+  if (!found) {
+    return res.status(404).json("No such user");
+  }
+});
+
 // Start the server and listen on port 3000
 app.listen(3000, () => {
   console.log("Server listening on port 3000");
 });
-
-/*
-/ --> res = this is working
-/signing --> POST success/fail
-/register --> POST = user
-/profile/:userId --> GET = user
-/image --> PUT --> user
-*/
