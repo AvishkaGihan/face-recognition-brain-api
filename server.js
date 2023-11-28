@@ -1,12 +1,15 @@
 // Import required modules
 const express = require("express");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt-nodejs");
+const cors = require("cors");
 
 // Create an instance of the Express application
 const app = express();
 
 // Use body-parser middleware to parse JSON requests
 app.use(bodyParser.json());
+app.use(cors());
 
 // In-memory database for demonstration purposes
 const database = {
@@ -15,8 +18,8 @@ const database = {
     {
       id: 1,
       name: "John Doe",
-      email: "john.doe@example.com",
       password: "password123",
+      email: "john.doe@example.com",
       entries: 0,
       joined: new Date(),
     },
@@ -31,10 +34,17 @@ const database = {
     {
       id: 3,
       name: "Bob Smith",
-      email: "bob.smith@example.com",
       password: "password123",
+      email: "bob.smith@example.com",
       entries: 0,
       joined: new Date(),
+    },
+  ],
+  login: [
+    {
+      id: "987",
+      has: "",
+      email: "John Doe",
     },
   ],
 };
@@ -46,6 +56,21 @@ app.get("/", (req, res) => {
 
 // Define a route for user sign-in
 app.post("/signin", (req, res) => {
+  // Load hash from your password DB.
+  bcrypt.compare(
+    "password123",
+    "$2a$10$wMjFXe7hI33iQ5mFXySJau74of74wOp1zJDd4iZJCga4qQVpYR8wO",
+    function (err, res) {
+      console.log("First guess", res);
+    }
+  );
+  bcrypt.compare(
+    "veggies",
+    "wMjFXe7hI33iQ5mFXySJau74of74wOp1zJDd4iZJCga4qQVpYR8wO",
+    function (err, res) {
+      console.log("Second guess", res);
+    }
+  );
   // Check if the provided email and password match the first user in the database
   if (
     req.body.email === database.users[0].email &&
