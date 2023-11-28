@@ -40,13 +40,6 @@ const database = {
       joined: new Date(),
     },
   ],
-  login: [
-    {
-      id: "987",
-      has: "",
-      email: "John Doe",
-    },
-  ],
 };
 
 // Define a route for the root path
@@ -56,28 +49,14 @@ app.get("/", (req, res) => {
 
 // Define a route for user sign-in
 app.post("/signin", (req, res) => {
-  // Load hash from your password DB.
-  bcrypt.compare(
-    "password123",
-    "$2a$10$wMjFXe7hI33iQ5mFXySJau74of74wOp1zJDd4iZJCga4qQVpYR8wO",
-    function (err, res) {
-      console.log("First guess", res);
-    }
-  );
-  bcrypt.compare(
-    "veggies",
-    "wMjFXe7hI33iQ5mFXySJau74of74wOp1zJDd4iZJCga4qQVpYR8wO",
-    function (err, res) {
-      console.log("Second guess", res);
-    }
-  );
   // Check if the provided email and password match the first user in the database
+
   if (
     req.body.email === database.users[0].email &&
     req.body.password === database.users[0].password
   ) {
     // Respond with "success" if the credentials are valid
-    res.json("success");
+    res.json(database.users[0]);
   } else {
     // Respond with an error status and message if the credentials are invalid
     res.status(400).json("Error logging in");
