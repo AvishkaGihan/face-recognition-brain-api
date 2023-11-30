@@ -16,49 +16,12 @@ const db = knex({
   },
 });
 
-db.select("*")
-  .from("users")
-  .then((data) => {
-    console.log(data);
-  });
-
 // Create an instance of the Express application
 const app = express();
 
 // Use body-parser middleware to parse JSON requests
 app.use(bodyParser.json());
 app.use(cors());
-
-// In-memory database for demonstration purposes
-const database = {
-  users: [
-    // Sample user data
-    {
-      id: 1,
-      name: "John Doe",
-      password: "password123",
-      email: "john.doe@example.com",
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: 2,
-      name: "Jane Doe",
-      email: "jane.doe@example.com",
-      password: "password123",
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: 3,
-      name: "Bob Smith",
-      password: "password123",
-      email: "bob.smith@example.com",
-      entries: 0,
-      joined: new Date(),
-    },
-  ],
-};
 
 // Define a route for the root path
 app.get("/", (req, res) => {
@@ -67,74 +30,81 @@ app.get("/", (req, res) => {
 
 // Define a route for user sign-in
 app.post("/signin", (req, res) => {
-  // Check if the provided email and password match the first user in the database
-
-  if (
-    req.body.email === database.users[0].email &&
-    req.body.password === database.users[0].password
-  ) {
-    // Respond with "success" if the credentials are valid
-    res.json(database.users[0]);
-  } else {
-    // Respond with an error status and message if the credentials are invalid
-    res.status(400).json("Error logging in");
-  }
+  db.select("email", "hash")
+    .where("email", "=", req.body.email)
+    .from("login")
+    .then((data) => {
+      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+      if (isValid) {
+        return db
+          .select("*")
+          .from("users")
+          .where("email", "=", req.body.email)
+          .then((user) => {
+            res.json(user);
+          })
+          .catch((err) => res.status(400).json("unable to get user"));
+      } else {
+        res.status(400).json("wrong credentials");
+      }
+    })
+    .catch((err) => {
+      res.status(400).json("wrong credentials");
+    });
 });
 
-// Define a route for user registration
 app.post("/register", (req, res) => {
-  // Extract user information from the request body
   const { email, name, password } = req.body;
 
-  db("users")
-    .insert({
-      name: name,
-      email: email,
-      joined: new Date(),
-    })
-    .then(console.log);
-
-  // Respond with the details of the newly registered user
-  res.json(database.users[database.users.length - 1]);
+  const hash = bcrypt.hashSync(password);
+  db.transaction((trx) => {
+    trx
+      .insert({ hash: hash, email: email })
+      .into("login")
+      .returning("email")
+      .then((loginEmail) => {
+        return trx("users")
+          .returning("*")
+          .insert({
+            name: name,
+            email: loginEmail[0].email,
+            joined: new Date(),
+          })
+          .then((user) => {
+            res.json(user[0]);
+          })
+          .then(trx.commit)
+          .catch(trx.rollback);
+      });
+  }).catch((err) => res.status(400).json("unable to register"));
 });
 
-// Define a route for fetching user profile by ID
 app.get("/profile/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  let found = false;
 
-  // Iterate through the database users to find the user with the specified ID
-  database.users.forEach((user) => {
-    if (user.id === id) {
-      found = true;
-      return res.json(user); // Respond with the user details if found
-    }
-  });
-
-  // If no user is found with the specified ID, respond with a 404 error
-  if (!found) {
-    return res.status(404).json("No such user");
-  }
+  db.select("*")
+    .from("users")
+    .where({ id })
+    .then((user) => {
+      if (user.length) {
+        res.json(user[0]);
+      } else {
+        res.status(400).json("Not found");
+      }
+    });
 });
 
-// Define a route for updating user image entry count
 app.put("/image", (req, res) => {
-  const id = parseInt(req.body.id);
-  let found = false;
+  const { id } = req.body;
 
-  // Iterate through the database users to find the user with the specified ID
-  database.users.forEach((user) => {
-    if (user.id === id) {
-      found = true;
-      user.entries++;
-      return res.json(user.entries);
-    }
-  });
-
-  // If no user is found with the specified ID, respond with a 404 error
-  if (!found) {
-    return res.status(404).json("No such user");
-  }
+  db("users")
+    .where("id", "=", id)
+    .increment("entries", 1)
+    .returning("entries")
+    .then((entries) => {
+      res.json(entries[0].entries);
+    })
+    .catch((err) => res.status(400).json("unable to get entries"));
 });
 
 // Start the server and listen on port 3000
