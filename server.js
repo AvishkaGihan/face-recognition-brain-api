@@ -3,6 +3,24 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt-nodejs");
 const cors = require("cors");
+const knex = require("knex");
+
+const db = knex({
+  client: "pg",
+  connection: {
+    host: "127.0.0.1",
+    port: 5432,
+    user: "postgres",
+    password: "root",
+    database: "smart-brain",
+  },
+});
+
+db.select("*")
+  .from("users")
+  .then((data) => {
+    console.log(data);
+  });
 
 // Create an instance of the Express application
 const app = express();
@@ -68,15 +86,13 @@ app.post("/register", (req, res) => {
   // Extract user information from the request body
   const { email, name, password } = req.body;
 
-  // Add a new user to the database
-  database.users.push({
-    id: 125,
-    name: name,
-    email: email,
-    password: password,
-    entries: 0,
-    joined: new Date(),
-  });
+  db("users")
+    .insert({
+      name: name,
+      email: email,
+      joined: new Date(),
+    })
+    .then(console.log);
 
   // Respond with the details of the newly registered user
   res.json(database.users[database.users.length - 1]);
