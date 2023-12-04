@@ -1,16 +1,12 @@
-// Import required modules
-const express = require("express");
-const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt-nodejs");
-const cors = require("cors");
-const knex = require("knex");
-
-// Import controllers for different routes
+import express from "express";
+import bcrypt from "bcrypt-nodejs";
+import cors from "cors";
+import knex from "knex";
 import register from "./controllers/register.js";
 import signin from "./controllers/signin.js";
 import profile from "./controllers/profile.js";
 import image from "./controllers/image.js";
-import handleApiCall from "./controllers/image.js";
+import bodyParser from "body-parser";
 
 // Create an instance of the Express application
 const app = express();
