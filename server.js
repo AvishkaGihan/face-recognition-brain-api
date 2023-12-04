@@ -11,6 +11,13 @@ const signin = require("./controllers/signin");
 const profile = require("./controllers/profile");
 const image = require("./controllers/image");
 
+// Create an instance of the Express application
+const app = express();
+
+// Middleware setup
+app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
+app.use(cors()); // Enable Cross-Origin Resource Sharing (CORS)
+
 // Create a connection to the PostgreSQL database
 const db = knex({
   client: "pg",
@@ -23,47 +30,15 @@ const db = knex({
   },
 });
 
-// Create an instance of the Express application
-const app = express();
-
-// Use body-parser middleware to parse JSON requests
-app.use(bodyParser.json());
-
-// Enable Cross-Origin Resource Sharing (CORS)
-app.use(cors());
-
-// Define a route for the root path
-app.get("/", (req, res) => {
-  // Send a JSON response for the root path
-  res.json(database.users); // Note: Update to use data from the database
-});
-
-// Define a route for user sign-in
-app.post("/signin", (req, res) => {
-  // Handle user sign-in using the signin controller
-  signin.handleSignin(req, res, db, bcrypt);
-});
-
-// Define a route for user registration
-app.post("/register", (req, res) => {
-  // Handle user registration using the register controller
-  register.handleRegister(req, res, db, bcrypt);
-});
-
-// Define a route for fetching user profiles by ID
-app.get("/profile/:id", (req, res) => {
-  // Handle profile retrieval using the profile controller
-  profile.handleProfileGet(req, res, db);
-});
-
-// Define a route for updating user images
-app.put("/image", (req, res) => {
-  // Handle image updates using the image controller
-  image.handleImage(req, res, db);
-});
+// Route definitions
+app.get("/", (req, res) => res.json(database.users)); // Define a route for the root path
+app.post("/signin", (req, res) => signin.handleSignin(req, res, db, bcrypt)); // Define a route for user sign-in
+app.post("/register", (req, res) =>
+  register.handleRegister(req, res, db, bcrypt)
+); // Define a route for user registration
+app.get("/profile/:id", (req, res) => profile.handleProfileGet(req, res, db)); // Define a route for fetching user profiles by ID
+app.put("/image", (req, res) => image.handleImage(req, res, db)); // Define a route for updating user images
+app.post("/imageUrl", (req, res) => image.handleApiCall(req, res, db)); // Define a route for updating user images
 
 // Start the server and listen on port 3000
-app.listen(3000, () => {
-  // Log a message when the server starts
-  console.log("Server listening on port 3000");
-});
+app.listen(3000, () => console.log("Server listening on port 3000")); // Log a message when the server starts
