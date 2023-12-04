@@ -6,10 +6,11 @@ const cors = require("cors");
 const knex = require("knex");
 
 // Import controllers for different routes
-const register = require("./controllers/register");
-const signin = require("./controllers/signin");
-const profile = require("./controllers/profile");
-const image = require("./controllers/image");
+import register from "./controllers/register.js";
+import signin from "./controllers/signin.js";
+import profile from "./controllers/profile.js";
+import image from "./controllers/image.js";
+import handleApiCall from "./controllers/image.js";
 
 // Create an instance of the Express application
 const app = express();
@@ -41,4 +42,6 @@ app.put("/image", (req, res) => image.handleImage(req, res, db)); // Define a ro
 app.post("/imageUrl", (req, res) => image.handleApiCall(req, res, db)); // Define a route for updating user images
 
 // Start the server and listen on port 3000
-app.listen(3000, () => console.log("Server listening on port 3000")); // Log a message when the server starts
+app.listen(process.env.PORT || 3000, () =>
+  console.log("Server listening on port 3000")
+); // Log a message when the server starts

@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 // Function to construct request options for Clarifai API
 const returnClarifyRequestOptions = (imageURL) => {
   const PAT = "5a31d47de34b4535a34c9c2268340b71";
@@ -58,7 +60,4 @@ const handleImage = (req, res, db) => {
     .catch((err) => res.status(400).json("unable to get entries"));
 };
 
-module.exports = {
-  handleImage: handleImage,
-  handleApiCall: handleApiCall,
-};
+export default { handleImage, handleApiCall };
