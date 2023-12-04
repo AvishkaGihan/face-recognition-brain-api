@@ -29,7 +29,15 @@ const db = knex({
 });
 
 // Route definitions
-app.get("/", (req, res) => res.json(database.users)); // Define a route for the root path
+app.get("/", (req, res) => {
+  db.select("*")
+    .from("users")
+    .then((users) => {
+      res.json(users);
+    })
+    .catch((err) => res.status(400).json("Error getting users"));
+});
+
 app.post("/signin", (req, res) => handleSignin(req, res, db, bcrypt)); // Define a route for user sign-in
 app.post("/register", (req, res) => handleRegister(req, res, db, bcrypt)); // Define a route for user registration
 app.get("/profile/:id", (req, res) => handleProfileGet(req, res, db)); // Define a route for fetching user profiles by ID
