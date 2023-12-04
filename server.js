@@ -2,11 +2,12 @@ import express from "express";
 import bcrypt from "bcrypt-nodejs";
 import cors from "cors";
 import knex from "knex";
-import register from "./controllers/register.js";
-import signin from "./controllers/signin.js";
-import profile from "./controllers/profile.js";
-import image from "./controllers/image.js";
 import bodyParser from "body-parser";
+
+import { handleSignin } from "./controllers/signin.js";
+import { handleRegister } from "./controllers/register.js";
+import { handleProfileGet } from "./controllers/profile.js";
+import { handleImage, handleApiCall } from "./controllers/image.js";
 
 // Create an instance of the Express application
 const app = express();
@@ -29,13 +30,11 @@ const db = knex({
 
 // Route definitions
 app.get("/", (req, res) => res.json(database.users)); // Define a route for the root path
-app.post("/signin", (req, res) => signin.handleSignin(req, res, db, bcrypt)); // Define a route for user sign-in
-app.post("/register", (req, res) =>
-  register.handleRegister(req, res, db, bcrypt)
-); // Define a route for user registration
-app.get("/profile/:id", (req, res) => profile.handleProfileGet(req, res, db)); // Define a route for fetching user profiles by ID
-app.put("/image", (req, res) => image.handleImage(req, res, db)); // Define a route for updating user images
-app.post("/imageUrl", (req, res) => image.handleApiCall(req, res, db)); // Define a route for updating user images
+app.post("/signin", (req, res) => handleSignin(req, res, db, bcrypt)); // Define a route for user sign-in
+app.post("/register", (req, res) => handleRegister(req, res, db, bcrypt)); // Define a route for user registration
+app.get("/profile/:id", (req, res) => handleProfileGet(req, res, db)); // Define a route for fetching user profiles by ID
+app.put("/image", (req, res) => handleImage(req, res, db)); // Define a route for updating user images
+app.post("/imageUrl", (req, res) => handleApiCall(req, res, db)); // Define a route for updating user images
 
 // Start the server and listen on port 3000
 app.listen(process.env.PORT || 3000, () =>

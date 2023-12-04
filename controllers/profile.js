@@ -1,4 +1,4 @@
-const handleProfileGet = (req, res, db) => {
+export const handleProfileGet = (req, res, db) => {
   const id = parseInt(req.params.id);
 
   db.select("*")
@@ -12,5 +12,3 @@ const handleProfileGet = (req, res, db) => {
       }
     });
 };
-
-export default handleProfileGet;

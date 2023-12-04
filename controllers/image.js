@@ -35,7 +35,7 @@ const returnClarifyRequestOptions = (imageURL) => {
   return requestOptions;
 };
 
-const handleApiCall = (req, res) => {
+export const handleApiCall = (req, res) => {
   fetch(
     "https://api.clarifai.com/v2/models/face-detection/outputs",
     returnClarifyRequestOptions(req.body.input)
@@ -47,7 +47,7 @@ const handleApiCall = (req, res) => {
     .catch((err) => res.status(400).json("unable to work with API"));
 };
 
-const handleImage = (req, res, db) => {
+export const handleImage = (req, res, db) => {
   const { id } = req.body;
 
   db("users")
@@ -59,5 +59,3 @@ const handleImage = (req, res, db) => {
     })
     .catch((err) => res.status(400).json("unable to get entries"));
 };
-
-export default { handleImage, handleApiCall };
